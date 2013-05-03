@@ -9,9 +9,16 @@
 
 // Import the interfaces
 #import "HelloWorldLayer.h"
+#import "CCTouchDispatcher.h"
+
+CCSprite *panda;
+CCSprite *bamboo1;
+CCSprite *bamboo2;
+CCSprite *bamboo3;
 
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
+#import "actionz.h"
 
 #pragma mark - HelloWorldLayer
 
@@ -19,8 +26,7 @@
 @implementation HelloWorldLayer
 
 // Helper class method that creates a Scene with the HelloWorldLayer as the only child.
-+(CCScene *) scene
-{
++(CCScene *) scene{
 	// 'scene' is an autorelease object.
 	CCScene *scene = [CCScene node];
 	
@@ -35,78 +41,44 @@
 }
 
 // on "init" you need to initialize your instance
--(id) init
-{
+-(id) init{
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super's" return value
-	if( (self=[super init]) ) {
-		
-		// create and initialize a Label
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Hello World" fontName:@"Marker Felt" fontSize:64];
-
-		// ask director for the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-	
-		// position the label on the center of the screen
-		label.position =  ccp( size.width /2 , size.height/2 );
-		
-		// add the label as a child to this Layer
-		[self addChild: label];
-		
-		
-		
-		//
-		// Leaderboards and Achievements
-		//
-		
-		// Default font size will be 28 points.
-		[CCMenuItemFont setFontSize:28];
-		
-		// Achievement Menu Item using blocks
-		CCMenuItem *itemAchievement = [CCMenuItemFont itemWithString:@"Achievements" block:^(id sender) {
-			
-			
-			GKAchievementViewController *achivementViewController = [[GKAchievementViewController alloc] init];
-			achivementViewController.achievementDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:achivementViewController animated:YES];
-			
-			[achivementViewController release];
-		}
-									   ];
-
-		// Leaderboard Menu Item using blocks
-		CCMenuItem *itemLeaderboard = [CCMenuItemFont itemWithString:@"Leaderboard" block:^(id sender) {
-			
-			
-			GKLeaderboardViewController *leaderboardViewController = [[GKLeaderboardViewController alloc] init];
-			leaderboardViewController.leaderboardDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:leaderboardViewController animated:YES];
-			
-			[leaderboardViewController release];
-		}
-									   ];
-		
-		CCMenu *menu = [CCMenu menuWithItems:itemAchievement, itemLeaderboard, nil];
-		
-		[menu alignItemsHorizontallyWithPadding:20];
-		[menu setPosition:ccp( size.width/2, size.height/2 - 50)];
-		
-		// Add the menu to the layer
-		[self addChild:menu];
+	if((self=[super init])) {
+        //sprites
+		panda = [CCSprite spriteWithFile:@"panda.png"];
+        panda.position = ccp(150, 150);
+        [self addChild:panda];
+        
+        bamboo1 = [CCSprite spriteWithFile:@"Bamboo.PNG"];
+        bamboo1.position = ccp(250, 150);
+        [self addChild:bamboo1];
+        
+        bamboo2 = [CCSprite spriteWithFile:@"Bamboo.PNG"];
+        bamboo2.position = ccp(450, 150);
+        [self addChild:bamboo2];
+        
+        bamboo3 = [CCSprite spriteWithFile:@"Bamboo.PNG"];
+        bamboo3.position = ccp(350, 150);
+        [self addChild:bamboo3];
+        
+        //menu items
+        CCMenuItem *changeScene = [CCMenuItemImage itemWithNormalImage:@"next.png"
+                                                        selectedImage:@"next.png"
+                                                        target:self
+                                                        selector:@selector(nextScene:)];
+        CCMenu *helloMenu = [CCMenu menuWithItems:changeScene, nil];
+        [helloMenu setPosition:ccp(420, 20)];
+        [self addChild:helloMenu];
+                
+        [[CCTouchDispatcher sharedDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
 
 	}
 	return self;
 }
 
 // on "dealloc" you need to release all your retained objects
-- (void) dealloc
-{
+- (void) dealloc{
 	// in case you have something to dealloc, do it in this method
 	// in this particular example nothing needs to be released.
 	// cocos2d will automatically release all the children (Label)
@@ -117,15 +89,30 @@
 
 #pragma mark GameKit delegate
 
--(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
-{
+-(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController{
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
 }
 
--(void) leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
-{
+-(void) leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController{
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
+}
+
+-(BOOL)ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event{
+    return YES;
+}
+-(void)ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event{
+    CGPoint location = [touch locationInView:[touch view]];
+    CGPoint convertedLocation = [[CCDirector sharedDirector]convertToGL:location];
+    
+    [panda stopAllActions];
+    [panda runAction:[CCMoveTo actionWithDuration:0 position:convertedLocation]];
+}
+-(void)nextScene:(id)sender{
+    /*[title stopAllActions];
+     [[CCDirector sharedDirector]replaceScene:[CCTransitionCrossFade transitionWithDuration:1 scene:[HelloWorldLayer node]]];*/
+    [self stopAllActions];
+    [[CCDirector sharedDirector] replaceScene:[CCTransitionCrossFade transitionWithDuration:.5 scene:[actionz node]]];
 }
 @end

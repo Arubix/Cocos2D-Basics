@@ -9,6 +9,7 @@
 
 // When you import this file, you import all the cocos2d classes
 #import "cocos2d.h"
+#import "MyCocos2DClass.h"
 
 // HelloWorldLayer
 @interface IntroLayer : CCLayer
